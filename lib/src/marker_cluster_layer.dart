@@ -15,7 +15,6 @@ import 'package:flutter_map_marker_cluster/src/node/marker_node.dart';
 import 'package:flutter_map_marker_cluster/src/node/marker_or_cluster_node.dart';
 import 'package:flutter_map_marker_cluster/src/rotate.dart';
 import 'package:flutter_map_marker_cluster/src/translate.dart';
-import 'package:flutter_map_marker_popup/extension_api.dart';
 import 'package:latlong2/latlong.dart';
 
 class MarkerClusterLayer extends StatefulWidget {
@@ -29,8 +28,7 @@ class MarkerClusterLayer extends StatefulWidget {
   State<MarkerClusterLayer> createState() => _MarkerClusterLayerState();
 }
 
-class _MarkerClusterLayerState extends State<MarkerClusterLayer>
-    with TickerProviderStateMixin {
+class _MarkerClusterLayerState extends State<MarkerClusterLayer> with TickerProviderStateMixin {
   late MapCalculator _mapCalculator;
   late ClusterManager _clusterManager;
   late int _maxZoom;
@@ -43,7 +41,6 @@ class _MarkerClusterLayerState extends State<MarkerClusterLayer>
   late AnimationController _centerMarkerController;
   late AnimationController _spiderfyController;
   PolygonLayer? _polygon;
-  final PopupState popupState = PopupState();
 
   _MarkerClusterLayerState();
 
@@ -184,23 +181,6 @@ class _MarkerClusterLayerState extends State<MarkerClusterLayer>
     if (_zoomController.isAnimating ||
         _centerMarkerController.isAnimating ||
         _fitBoundController.isAnimating) return;
-
-    if (widget.options.popupOptions != null) {
-      final popupOptions = widget.options.popupOptions!;
-      enter
-          ? Future.delayed(
-              Duration(
-                  milliseconds: popupOptions.timeToShowPopupOnHover >= 0
-                      ? popupOptions.timeToShowPopupOnHover
-                      : 0), () {
-              popupOptions.markerTapBehavior.apply(
-                marker.marker,
-                PopupState.maybeOf(context, listen: false) ?? PopupState(),
-                popupOptions.popupController,
-              );
-            })
-          : popupOptions.popupController.hideAllPopups();
-    }
 
     if (widget.options.onMarkerTap != null) {
       enter
@@ -523,12 +503,11 @@ class _MarkerClusterLayerState extends State<MarkerClusterLayer>
     final popupOptions = widget.options.popupOptions;
     if (popupOptions != null) {
       layers.add(PopupLayer(
-        popupState: PopupState.maybeOf(context, listen: false) ?? PopupState(),
-        popupBuilder: popupOptions.popupBuilder,
-        popupSnap: popupOptions.popupSnap,
-        popupController: popupOptions.popupController,
-        popupAnimation: popupOptions.popupAnimation,
-        markerRotate: popupOptions.markerRotate,
+        popupDisplayOptions: PopupDisplayOptions(
+          animation: popupOptions.popupAnimation,
+          builder: popupOptions.popupBuilder,
+          snap: popupOptions.popupSnap
+        )
       ));
     }
 
@@ -616,16 +595,6 @@ class _MarkerClusterLayerState extends State<MarkerClusterLayer>
   VoidCallback _onMarkerTap(MarkerNode marker) {
     return () {
       if (_animating) return;
-
-      if (widget.options.popupOptions != null) {
-        final popupOptions = widget.options.popupOptions!;
-        popupOptions.markerTapBehavior.apply(
-          marker.marker,
-          PopupState.maybeOf(context, listen: false) ?? PopupState(),
-          popupOptions.popupController,
-        );
-      }
-
       widget.options.onMarkerTap?.call(marker.marker);
 
       if (!widget.options.centerMarkerOnClick) return;

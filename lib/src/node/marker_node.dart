@@ -12,7 +12,7 @@ class MarkerNode extends MarkerOrClusterNode implements Marker {
   Key? get key => marker.key;
 
   @override
-  Anchor get anchor => marker.anchor;
+  Anchor get anchor => marker.anchor!;
 
   @override
   WidgetBuilder get builder => marker.builder;

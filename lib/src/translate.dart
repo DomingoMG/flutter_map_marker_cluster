@@ -52,8 +52,8 @@ abstract class Translate {
         .getPixelFromPoint(customPoint ?? clusterNode.bounds.center);
 
     final calculatedSize = clusterNode.size();
-    final anchor = Anchor.forPos(
-      clusterNode.anchorPos,
+    final anchor = Anchor.fromPos(
+      clusterNode.anchorPos!,
       calculatedSize.width,
       calculatedSize.height,
     );
